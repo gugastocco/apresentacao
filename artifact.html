@@ -1,0 +1,1261 @@
+<title>A World Appears — The Consciousness Framework</title>
+<style>
+  /* ============================================================
+     A WORLD APPEARS — Consciousness Framework
+     Design system: Palantir-inspired. Near-black canvas,
+     hairline grids, monospaced coordinates, cinematic visuals.
+     ============================================================ */
+
+  :root {
+    --bg:        #08090B;
+    --bg-2:      #0C0E11;
+    --panel:     #0E1116;
+    --ink:       #EDEDEA;
+    --ink-dim:   #A7ABB2;
+    --mute:      #71757D;
+    --faint:     #3A3E45;
+    --line:      rgba(255,255,255,0.09);
+    --line-2:    rgba(255,255,255,0.05);
+    --accent:    #6C8CFF;   /* cold signal blue */
+    --accent-dim:#3F5AC0;
+    --warm:      #D6A15E;   /* rare warm signal */
+    --glow:      rgba(108,140,255,0.55);
+
+    --sans: "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
+
+    --maxw: 1240px;
+    --gutter: clamp(20px, 5vw, 64px);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body {
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    letter-spacing:0.01em;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  ::selection { background:rgba(108,140,255,0.32); color:#fff; }
+
+  a { color:inherit; text-decoration:none; }
+  img, svg, canvas { display:block; max-width:100%; }
+
+  /* ---------- Global grid overlay ---------- */
+  .grid-overlay {
+    position:fixed; inset:0; pointer-events:none; z-index:1;
+    background-image:
+      linear-gradient(to right, var(--line-2) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line-2) 1px, transparent 1px);
+    background-size: clamp(80px,10vw,140px) clamp(80px,10vw,140px);
+    mask-image: radial-gradient(ellipse 120% 90% at 50% 30%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 30%, #000 30%, transparent 100%);
+    opacity:.7;
+  }
+  .vignette {
+    position:fixed; inset:0; pointer-events:none; z-index:2;
+    background: radial-gradient(ellipse 100% 100% at 50% 0%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* ---------- Scroll progress ---------- */
+  .progress {
+    position:fixed; top:0; left:0; height:2px; width:0%;
+    background:linear-gradient(90deg, var(--accent-dim), var(--accent));
+    z-index:60; box-shadow:0 0 12px var(--glow);
+    transition:width .12s linear;
+  }
+
+  /* ---------- Nav ---------- */
+  header.nav {
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px var(--gutter);
+    background:linear-gradient(to bottom, rgba(8,9,11,0.9), rgba(8,9,11,0));
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s, background .3s;
+  }
+  header.nav.solid {
+    background:rgba(8,9,11,0.86);
+    border-bottom:1px solid var(--line);
+  }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-mark {
+    width:22px; height:22px; position:relative; flex:0 0 auto;
+  }
+  .brand-mark svg { width:100%; height:100%; }
+  .brand-name {
+    font-family:var(--mono); font-size:12px; letter-spacing:0.22em;
+    text-transform:uppercase; color:var(--ink);
+  }
+  .brand-name b { color:var(--accent); font-weight:600; }
+  .nav-index {
+    display:flex; gap:26px; font-family:var(--mono);
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--mute);
+  }
+  .nav-index a { transition:color .2s; position:relative; padding:4px 0; }
+  .nav-index a:hover { color:var(--ink); }
+  .nav-index a.active { color:var(--accent); }
+  .nav-index a.active::after {
+    content:""; position:absolute; left:0; right:0; bottom:-2px; height:1px;
+    background:var(--accent); box-shadow:0 0 8px var(--glow);
+  }
+  @media (max-width:860px){ .nav-index{ display:none; } }
+
+  /* ---------- Layout primitives ---------- */
+  .wrap { max-width:var(--maxw); margin:0 auto; padding:0 var(--gutter); position:relative; z-index:5; }
+  section { position:relative; z-index:5; }
+
+  .eyebrow {
+    font-family:var(--mono); font-size:11px; letter-spacing:0.28em;
+    text-transform:uppercase; color:var(--accent);
+    display:inline-flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before {
+    content:""; width:22px; height:1px; background:var(--accent); opacity:.7;
+  }
+  .kicker-mono {
+    font-family:var(--mono); font-size:11px; letter-spacing:0.2em;
+    text-transform:uppercase; color:var(--mute);
+  }
+
+  h1,h2,h3 { font-weight:600; line-height:1.05; letter-spacing:-0.02em; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position:relative; min-height:100vh; display:flex; align-items:center;
+    overflow:hidden; border-bottom:1px solid var(--line);
+  }
+  #hero-canvas {
+    position:absolute; inset:0; width:100%; height:100%; z-index:1;
+    opacity:.9;
+  }
+  .hero-fade {
+    position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 48%, rgba(8,9,11,0) 0%, rgba(8,9,11,0.35) 70%, rgba(8,9,11,0.9) 100%),
+      linear-gradient(to bottom, rgba(8,9,11,0.4), rgba(8,9,11,0) 25%, rgba(8,9,11,0) 70%, var(--bg) 100%);
+  }
+  .hero .wrap { z-index:5; width:100%; }
+  .hero-inner { max-width:920px; }
+  .hero h1 {
+    font-size:clamp(2.6rem, 7vw, 5.6rem);
+    margin:22px 0 0;
+  }
+  .hero h1 .line2 { color:var(--ink-dim); }
+  .hero-sub {
+    margin-top:26px; max-width:620px; font-size:clamp(1rem,1.6vw,1.22rem);
+    color:var(--ink-dim); line-height:1.65;
+  }
+  .hero-meta {
+    margin-top:40px; display:flex; flex-wrap:wrap; gap:28px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.16em;
+    text-transform:uppercase; color:var(--mute);
+    border-top:1px solid var(--line); padding-top:20px; max-width:620px;
+  }
+  .hero-meta span b { color:var(--ink); font-weight:500; display:block; margin-top:4px; letter-spacing:0.1em; }
+  .scroll-cue {
+    position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:5;
+    font-family:var(--mono); font-size:10px; letter-spacing:0.3em; text-transform:uppercase;
+    color:var(--mute); display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .scroll-cue .bar { width:1px; height:40px; background:linear-gradient(var(--accent), transparent); animation:cue 2.4s infinite; }
+  @keyframes cue { 0%{transform:scaleY(0);transform-origin:top;} 50%{transform:scaleY(1);transform-origin:top;} 51%{transform-origin:bottom;} 100%{transform:scaleY(0);transform-origin:bottom;} }
+
+  /* corner crosshairs */
+  .crosshair { position:absolute; z-index:5; width:14px; height:14px; opacity:.5; }
+  .crosshair::before, .crosshair::after { content:""; position:absolute; background:var(--faint); }
+  .crosshair::before { left:50%; top:0; width:1px; height:100%; transform:translateX(-50%); }
+  .crosshair::after { top:50%; left:0; height:1px; width:100%; transform:translateY(-50%); }
+  .ch-tl { top:84px; left:20px; } .ch-tr { top:84px; right:20px; }
+
+  /* ---------- Section shells ---------- */
+  .band { padding:clamp(80px,12vh,150px) 0; border-bottom:1px solid var(--line); position:relative; }
+  .section-head { display:flex; align-items:baseline; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:56px; }
+  .section-head h2 { font-size:clamp(1.9rem,4vw,3.1rem); max-width:16ch; }
+  .section-head .idx { font-family:var(--mono); font-size:12px; color:var(--mute); letter-spacing:0.2em; }
+  .lead { max-width:60ch; color:var(--ink-dim); font-size:clamp(1.02rem,1.5vw,1.2rem); line-height:1.7; }
+
+  /* ---------- Framework overview ---------- */
+  .overview { text-align:center; }
+  .overview .lead { margin:0 auto; }
+  .dims {
+    margin-top:64px; display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  @media (max-width:820px){ .dims{ grid-template-columns:repeat(1,1fr);} }
+  .dim-cell {
+    background:var(--bg); padding:30px 26px; text-align:left; position:relative;
+    min-height:190px; transition:background .3s, transform .3s;
+    display:flex; flex-direction:column;
+  }
+  .dim-cell:hover { background:var(--bg-2); }
+  .dim-cell .num { font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:0.2em; }
+  .dim-cell h3 { font-size:1.28rem; margin:16px 0 8px; letter-spacing:-0.01em; }
+  .dim-cell p { color:var(--mute); font-size:.92rem; line-height:1.55; }
+  .dim-cell .tag { margin-top:auto; font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--faint); padding-top:18px; }
+  .dim-cell:hover .tag { color:var(--accent); }
+
+  /* ---------- Dimension detail sections ---------- */
+  .dimension { padding:clamp(80px,12vh,140px) 0; border-bottom:1px solid var(--line); position:relative; overflow:hidden; }
+  .dim-grid { display:grid; grid-template-columns:1fr 1fr; gap:clamp(40px,6vw,88px); align-items:center; }
+  .dimension.reverse .dim-grid { direction:rtl; }
+  .dimension.reverse .dim-grid > * { direction:ltr; }
+  @media (max-width:900px){ .dim-grid{ grid-template-columns:1fr; gap:48px; } .dimension.reverse .dim-grid{ direction:ltr; } }
+
+  .dim-copy .roman { font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:0.3em; }
+  .dim-copy h2 { font-size:clamp(2rem,4.4vw,3.3rem); margin:14px 0 4px; }
+  .dim-copy .subtitle { color:var(--ink-dim); font-size:1.12rem; margin-bottom:26px; font-weight:400; }
+  .dim-copy p { color:var(--ink-dim); margin-bottom:18px; max-width:52ch; }
+  .dim-copy p strong { color:var(--ink); font-weight:600; }
+
+  .evidence { margin-top:30px; border-top:1px solid var(--line); }
+  .evidence .row { display:flex; gap:18px; padding:18px 0; border-bottom:1px solid var(--line-2); }
+  .evidence .row .k { font-family:var(--mono); font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); flex:0 0 128px; padding-top:3px; }
+  .evidence .row .v { color:var(--ink-dim); font-size:.95rem; line-height:1.55; }
+  .evidence .row .v b { color:var(--ink); font-weight:600; }
+
+  .signal {
+    margin-top:34px; padding:22px 26px; border-left:2px solid var(--accent);
+    background:linear-gradient(90deg, rgba(108,140,255,0.06), transparent);
+    font-size:1.12rem; line-height:1.5; color:var(--ink); font-weight:500;
+  }
+  .signal .src { display:block; margin-top:10px; font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute); font-weight:400; }
+
+  /* visual frame */
+  .visual {
+    position:relative; aspect-ratio:1/1; width:100%;
+    border:1px solid var(--line); background:
+      radial-gradient(ellipse 90% 90% at 50% 40%, rgba(108,140,255,0.05), transparent 70%),
+      var(--bg-2);
+    overflow:hidden;
+  }
+  .visual svg { width:100%; height:100%; }
+  .visual .fig-label {
+    position:absolute; bottom:14px; left:16px; font-family:var(--mono);
+    font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--mute); z-index:4;
+  }
+  .visual .coord {
+    position:absolute; top:14px; right:16px; font-family:var(--mono);
+    font-size:9.5px; letter-spacing:0.1em; color:var(--faint); text-align:right; line-height:1.5; z-index:4;
+  }
+  .visual .corner { position:absolute; width:10px; height:10px; border:1px solid var(--faint); z-index:4; }
+  .visual .c-tl{ top:10px; left:10px; border-right:0; border-bottom:0;}
+  .visual .c-tr{ top:10px; right:10px; border-left:0; border-bottom:0;}
+  .visual .c-bl{ bottom:10px; left:10px; border-right:0; border-top:0;}
+  .visual .c-br{ bottom:10px; right:10px; border-left:0; border-top:0;}
+
+  /* ---------- Paradigms ---------- */
+  .paradigms .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin-top:56px; }
+  @media (max-width:900px){ .paradigms .cards{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:520px){ .paradigms .cards{ grid-template-columns:1fr;} }
+  .p-card { background:var(--bg); padding:28px 24px; display:flex; flex-direction:column; gap:16px; transition:background .3s; }
+  .p-card:hover { background:var(--bg-2); }
+  .p-card .p-vis { aspect-ratio:1/1; border:1px solid var(--line); background:var(--bg-2); position:relative; overflow:hidden; }
+  .p-card .p-vis svg { width:100%; height:100%; }
+  .p-card h3 { font-size:1.15rem; }
+  .p-card .p-num { font-family:var(--mono); font-size:10px; letter-spacing:0.2em; color:var(--accent); }
+  .p-card p { color:var(--mute); font-size:.88rem; line-height:1.55; }
+
+  /* ---------- Conclusion ---------- */
+  .conclusion { text-align:center; padding:clamp(90px,16vh,180px) 0; border-bottom:1px solid var(--line); position:relative; overflow:hidden; }
+  #dontknow-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:1; opacity:.55; }
+  .conclusion .wrap { z-index:5; }
+  .conclusion h2 { font-size:clamp(2.2rem,5vw,4rem); max-width:20ch; margin:22px auto 30px; }
+  .conclusion .lead { margin:0 auto 40px; }
+  .conclusion .hygiene { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); max-width:900px; margin:56px auto 0; text-align:left; }
+  @media (max-width:760px){ .conclusion .hygiene{ grid-template-columns:1fr;} }
+  .hygiene .h-cell { background:var(--bg); padding:26px 24px; }
+  .hygiene .h-cell .k { font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); }
+  .hygiene .h-cell h4 { font-size:1.05rem; margin:12px 0 8px; font-weight:600; letter-spacing:-0.01em; }
+  .hygiene .h-cell p { color:var(--mute); font-size:.9rem; line-height:1.55; }
+
+  /* ---------- Reading ---------- */
+  .reading .list { margin-top:48px; border-top:1px solid var(--line); }
+  .reading .item { display:grid; grid-template-columns:60px 1fr auto; gap:24px; align-items:center; padding:26px 0; border-bottom:1px solid var(--line); transition:padding-left .3s, background .3s; }
+  .reading .item:hover { padding-left:14px; background:linear-gradient(90deg, rgba(108,140,255,0.05), transparent); }
+  .reading .item .n { font-family:var(--mono); font-size:12px; color:var(--mute); }
+  .reading .item .t { font-size:1.2rem; font-weight:600; }
+  .reading .item .t span { display:block; font-size:.9rem; font-weight:400; color:var(--mute); margin-top:4px; }
+  .reading .item .d { color:var(--ink-dim); font-size:.92rem; max-width:40ch; }
+  @media (max-width:760px){ .reading .item{ grid-template-columns:40px 1fr; } .reading .item .d{ grid-column:1/-1; padding-left:64px;} }
+
+  /* ---------- Footer ---------- */
+  footer { padding:70px var(--gutter) 60px; }
+  .foot-grid { max-width:var(--maxw); margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:30px; }
+  .foot-brand { font-family:var(--mono); font-size:12px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ink); }
+  .foot-brand span { display:block; color:var(--mute); margin-top:12px; max-width:34ch; line-height:1.6; letter-spacing:0.05em; text-transform:none; font-size:12px; }
+  .foot-meta { font-family:var(--mono); font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--mute); text-align:right; line-height:2; }
+  .foot-rule { max-width:var(--maxw); margin:40px auto 0; border-top:1px solid var(--line); padding-top:20px; display:flex; justify-content:space-between; font-family:var(--mono); font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--faint); flex-wrap:wrap; gap:10px; }
+
+  /* ---------- Reveal animation ---------- */
+  .reveal { opacity:0; transform:translateY(26px); transition:opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
+  .reveal.in { opacity:1; transform:none; }
+  .reveal.d1{ transition-delay:.08s;} .reveal.d2{ transition-delay:.16s;} .reveal.d3{ transition-delay:.24s;} .reveal.d4{ transition-delay:.32s;}
+
+  @media (prefers-reduced-motion: reduce) {
+    *{ animation:none !important; transition:none !important; }
+    .reveal{ opacity:1; transform:none; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+
+
+<div class="progress" id="progress"></div>
+<div class="grid-overlay"></div>
+<div class="vignette"></div>
+
+<!-- ================= NAV ================= -->
+<header class="nav" id="nav">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="20" height="20" stroke="#6C8CFF" stroke-width="1"/>
+        <circle cx="11" cy="11" r="5.4" stroke="#EDEDEA" stroke-width="1"/>
+        <circle cx="11" cy="11" r="1.6" fill="#6C8CFF"/>
+        <path d="M11 1 V21 M1 11 H21" stroke="#6C8CFF" stroke-width="0.5" opacity="0.4"/>
+      </svg>
+    </span>
+    <span class="brand-name">A World <b>Appears</b></span>
+  </div>
+  <nav class="nav-index" id="navIndex">
+    <a href="#framework" data-t="framework">Framework</a>
+    <a href="#stream" data-t="stream">I·Stream</a>
+    <a href="#substrate" data-t="substrate">II·Substrate</a>
+    <a href="#spectrum" data-t="spectrum">III·Spectrum</a>
+    <a href="#purpose" data-t="purpose">IV·Purpose</a>
+    <a href="#aperture" data-t="aperture">V·Aperture</a>
+    <a href="#sovereignty" data-t="sovereignty">VI·Sovereignty</a>
+    <a href="#horizon" data-t="horizon">Horizon</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-fade"></div>
+  <span class="crosshair ch-tl"></span>
+  <span class="crosshair ch-tr"></span>
+  <div class="wrap">
+    <div class="hero-inner">
+      <span class="eyebrow">A Framework for the Science &amp; Mystery of Mind</span>
+      <h1>A World Appears.<br><span class="line2">Consciousness, mapped.</span></h1>
+      <p class="hero-sub">
+        The one phenomenon you experience with absolute certainty — and understand least.
+        Six dimensions for navigating what mind is, where it lives, who shares it, why it
+        emerged, how it narrows, and what threatens its sovereignty.
+      </p>
+      <div class="hero-meta">
+        <span>Source Field<b>Pollan · James · Solms · Gopnik</b></span>
+        <span>Structure<b>6 Dimensions + Horizon</b></span>
+        <span>Stance<b>The Don't-Know Mind</b></span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Descend</span><span class="bar"></span></div>
+</section>
+
+<!-- ================= FRAMEWORK OVERVIEW ================= -->
+<section class="band overview" id="framework">
+  <div class="wrap">
+    <div class="reveal"><span class="eyebrow" style="justify-content:center;">The Framework</span></div>
+    <h2 class="reveal d1" style="font-size:clamp(2rem,4.6vw,3.4rem); max-width:22ch; margin:22px auto 26px;">
+      Consciousness is not one question. It is six, stacked.
+    </h2>
+    <p class="lead reveal d2">
+      Materialism — the belief that the brain simply <em>produces</em> mind — is hitting a wall.
+      To think clearly past it, this framework separates consciousness into six measurable dimensions,
+      moving inward from the texture of a single thought to the outward war being waged over your attention.
+      A seventh layer, the Horizon, holds the metaphysical theories that remain unresolved.
+    </p>
+
+    <div class="dims">
+      <div class="dim-cell reveal">
+        <span class="num">I</span><h3>The Stream</h3>
+        <p>The real texture of inner experience: non-linguistic, banal, and continuous — not the lively monologue we imagine.</p>
+        <span class="tag">Inner Experience →</span>
+      </div>
+      <div class="dim-cell reveal d1">
+        <span class="num">II</span><h3>The Substrate</h3>
+        <p>Mind is embodied. The brain exists to keep a body alive, so feelings — not logic — are the ground of experience.</p>
+        <span class="tag">The Embodied Mind →</span>
+      </div>
+      <div class="dim-cell reveal d2">
+        <span class="num">III</span><h3>The Spectrum</h3>
+        <p>Sentience extends past the human. Plants sense, respond, and even sleep — collapsing the line we drew around ourselves.</p>
+        <span class="tag">Beyond the Human →</span>
+      </div>
+      <div class="dim-cell reveal">
+        <span class="num">IV</span><h3>The Purpose</h3>
+        <p>Why does awareness exist if 90% of the brain runs on autopilot? To resolve felt uncertainty and navigate other minds.</p>
+        <span class="tag">Why It Exists →</span>
+      </div>
+      <div class="dim-cell reveal d1">
+        <span class="num">V</span><h3>The Aperture</h3>
+        <p>Attention has two settings: the child's 360° lantern and the professor's narrow spotlight. Each reveals a different world.</p>
+        <span class="tag">Spotlight &amp; Lantern →</span>
+      </div>
+      <div class="dim-cell reveal d2">
+        <span class="num">VI</span><h3>The Sovereignty</h3>
+        <p>Modernity overtrains the spotlight. The attention economy now competes for your dream-time — and your capacity to think alone.</p>
+        <span class="tag">Attention &amp; Modernity →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= I. THE STREAM ================= -->
+<section class="dimension" id="stream">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION I</span>
+        <h2>The Stream</h2>
+        <p class="subtitle">The texture of inner experience</p>
+        <p>
+          We believe our inner life is vivid, verbal, and continuous. When it is actually
+          <strong>sampled</strong>, it turns out to be something stranger: often wordless, frequently
+          <strong>banal</strong>, and made of half-formed impressions rather than clean sentences.
+        </p>
+        <p>
+          William James, the godfather of American psychology, called it a <strong>stream</strong> — not
+          a chain of discrete states. Each thought arrives wrapped in a <strong>fringe</strong> of
+          "auras, halos, associations and psychic overtones" that cannot be cleanly separated from it.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">Beeper Study</div><div class="v"><b>Russell Hurlburt</b> — a 50-year program that beeps subjects at random to capture the raw thought. Verdict: inner life is often as trivial as choosing "the bread heel or a roll."</div></div>
+          <div class="row"><div class="k">Gossamer Wisps</div><div class="v">Thoughts are <b>"inter-infected"</b> — one image colors the next, resisting division into discrete chunks.</div></div>
+          <div class="row"><div class="k">Qualia vs. Nuance</div><div class="v">Reductionism flattens experience into <b>qualia</b>; James insisted on the unarticulated affinities between thoughts.</div></div>
+        </div>
+        <div class="signal">
+          "Consciousness does not appear to itself chopped up in bits… it flows. A 'river' or a 'stream' are the metaphors by which it is most naturally described."
+          <span class="src">— William James</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 01<br>STREAM · FRINGE<br> n≈samples/50y</div>
+          <div class="fig-label">Fig. 01 — The stream of mentation</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="streamG" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#6C8CFF" stop-opacity="0"/>
+                <stop offset="0.5" stop-color="#6C8CFF" stop-opacity="0.9"/>
+                <stop offset="1" stop-color="#6C8CFF" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g id="streamLines" stroke="url(#streamG)" fill="none"></g>
+            <g id="streamNodes" fill="#EDEDEA"></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= II. THE SUBSTRATE ================= -->
+<section class="dimension reverse" id="substrate">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION II</span>
+        <h2>The Substrate</h2>
+        <p class="subtitle">The embodied mind</p>
+        <p>
+          Consciousness is not a computation floating in a skull. It is an <strong>embodied
+          phenomenon</strong>. The brain's first job is to keep a vulnerable body alive — so the
+          signals rising from that body are not noise around thought. They are its <strong>foundation</strong>.
+        </p>
+        <p>
+          Feelings come first. They are <strong>"the beginning of conscious experience,"</strong> weighted
+          by the organism's exposure to suffering and death. Even morality is somatic: settle a queasy
+          stomach and moral disgust itself measurably softens.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">Gut & Morality</div><div class="v">Calming the stomach with <b>ginger</b> reduces a subject's <b>moral disgust</b> — judgment routed through the body.</div></div>
+          <div class="row"><div class="k">The 4-Second Delay</div><div class="v">fMRI on meditators shows a <b>~4-second gap</b> between a thought igniting in the hippocampus and the self becoming aware of it.</div></div>
+          <div class="row"><div class="k">Global Workspace</div><div class="v">Thoughts <b>compete</b> for broadcast; only the most salient reach awareness — yet trivial ones often win, unexplained.</div></div>
+        </div>
+        <div class="signal">
+          A thought is chosen four seconds before "you" decide to think it. Awareness is the last stop, not the first.
+          <span class="src">— On the Darwinian unconscious</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 02<br>SOMA → CORTEX<br>Δt ≈ 4000ms</div>
+          <div class="fig-label">Fig. 02 — Feeling as foundation</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="pulseG" cx="0.5" cy="0.62" r="0.5">
+                <stop offset="0" stop-color="#D6A15E" stop-opacity="0.9"/>
+                <stop offset="1" stop-color="#D6A15E" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g id="somaRings" fill="none" stroke="#6C8CFF"></g>
+            <circle id="somaCore" cx="200" cy="248" r="10" fill="url(#pulseG)"/>
+            <g id="somaNodes"></g>
+            <g id="somaLinks" stroke="#3F5AC0" stroke-width="0.6" fill="none"></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= III. THE SPECTRUM ================= -->
+<section class="dimension" id="spectrum">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION III</span>
+        <h2>The Spectrum</h2>
+        <p class="subtitle">Sentience beyond the human</p>
+        <p>
+          Sentience — the ability to <strong>sense and respond with purpose</strong> — does not require
+          neurons. Plants, which have none, still behave with directionality: they seek food, flee poison,
+          and can be put to sleep. The line we drew around human consciousness is dissolving.
+        </p>
+        <p>
+          The danger is ideological. Descartes called animals <strong>"functionally robotic"</strong> and
+          their screams "automatic noise," a doctrine that licensed vivisection. History warns that a
+          framework can override the evidence of suffering right in front of us.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">Anesthesia</div><div class="v"><b>Mimosa pudica</b> exposed to gases like <b>xenon</b> — which anesthetize humans — stops responding and enters a sleep-like state.</div></div>
+          <div class="row"><div class="k">Plants Sleep</div><div class="v"><b>Mancuso & Tononi</b>: plants meet the scientific criteria for sleep, once reserved for mammals and birds.</div></div>
+          <div class="row"><div class="k">Purpose vs. Mechanism</div><div class="v">Unlike a thermostat, bacteria use <b>chemotaxis</b> — telling food from poison. A sense of purpose, not a switch.</div></div>
+        </div>
+        <div class="signal">
+          A toaster reacts. A cell <em>chooses</em>. Directionality — the pursuit of food and the flight from harm — is the first flicker of sentience.
+          <span class="src">— On plant neurobiology</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 03<br>SENTIENCE GRADIENT<br>bacteria→plant→mind</div>
+          <div class="fig-label">Fig. 03 — The spectrum of sentience</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="spectrumG" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0" stop-color="#3F5AC0" stop-opacity="0.7"/>
+                <stop offset="1" stop-color="#6C8CFF" stop-opacity="0.95"/>
+              </linearGradient>
+            </defs>
+            <g id="growth" stroke="url(#spectrumG)" fill="none" stroke-linecap="round"></g>
+            <g id="growthDots" fill="#D6A15E"></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= IV. THE PURPOSE ================= -->
+<section class="dimension reverse" id="purpose">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION IV</span>
+        <h2>The Purpose</h2>
+        <p class="subtitle">Why consciousness exists</p>
+        <p>
+          If roughly <strong>90% of brain activity is unconscious</strong> and automated, awareness is
+          expensive and strange. Why did it evolve at all? The leading answer: consciousness is what a
+          system produces when its <strong>automatic responses fail</strong>.
+        </p>
+        <p>
+          Neuroscientist <strong>Mark Solms</strong> argues it exists to resolve <strong>felt
+          uncertainty</strong> — when competing needs (hunger vs. exhaustion) can't be settled by
+          algorithm, feeling opens a space for a decision. And because social life can't be automated,
+          we evolved a <strong>Theory of Mind</strong> to model the minds of others.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">Felt Uncertainty</div><div class="v">When algorithms deadlock on competing drives, <b>consciousness is the tie-breaker</b> — the felt space of choice.</div></div>
+          <div class="row"><div class="k">Social Complexity</div><div class="v">Other people cannot be run on autopilot; awareness is an adaptation for <b>anticipating other minds</b>.</div></div>
+          <div class="row"><div class="k">The 90% Dark</div><div class="v">Most cognition is unconscious. Awareness lights up only at the <b>edge of the unpredictable</b>.</div></div>
+        </div>
+        <div class="signal">
+          Consciousness is not the driver of the machine. It is the light that switches on precisely when the machine no longer knows what to do.
+          <span class="src">— After Mark Solms</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 04<br>DECISION BIFURCATION<br>uncertainty→choice</div>
+          <div class="fig-label">Fig. 04 — Resolving felt uncertainty</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <g id="tree" stroke="#6C8CFF" fill="none" stroke-linecap="round"></g>
+            <g id="treeNodes" fill="#EDEDEA"></g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= V. THE APERTURE ================= -->
+<section class="dimension" id="aperture">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION V</span>
+        <h2>The Aperture</h2>
+        <p class="subtitle">Spotlight &amp; lantern</p>
+        <p>
+          Attention is not fixed — it has an aperture. Developmental psychologist
+          <strong>Alison Gopnik</strong> names its two extremes. <strong>Lantern consciousness</strong> is
+          the wide, 360° intake of the child or the mind on psychedelics: undisciplined, diffuse, and
+          fertile for divergent, creative association.
+        </p>
+        <p>
+          <strong>Spotlight consciousness</strong> is the "professor" mode — narrow, goal-directed,
+          efficient. But its focus is a pair of <strong>blinders</strong> that filters out nearly the
+          entire world. Neither is superior; each renders a different reality.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">Lantern</div><div class="v">Wide, exploratory, associative. High in children and psychedelic states. Engine of <b>divergent thinking</b>.</div></div>
+          <div class="row"><div class="k">Spotlight</div><div class="v">Narrow, sharp, executive. Efficient for tasks — at the cost of <b>filtering out the environment</b>.</div></div>
+          <div class="row"><div class="k">Mind-Wandering</div><div class="v">Spontaneous thought is the <b>hygienic space</b> of creativity — original association needs room to drift.</div></div>
+        </div>
+        <div class="signal">
+          The child sees a whole lit room; the professor sees one bright object and calls the rest darkness. Wisdom is knowing which aperture the moment requires.
+          <span class="src">— After Alison Gopnik</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 05<br>APERTURE MODES<br>360° ⇄ cone</div>
+          <div class="fig-label">Fig. 05 — Lantern vs. spotlight</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="lanternG" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0" stop-color="#6C8CFF" stop-opacity="0.55"/>
+                <stop offset="1" stop-color="#6C8CFF" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="spotG" x1="0.5" y1="0" x2="0.5" y2="1">
+                <stop offset="0" stop-color="#D6A15E" stop-opacity="0.85"/>
+                <stop offset="1" stop-color="#D6A15E" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <circle id="lanternField" cx="200" cy="200" r="150" fill="url(#lanternG)"/>
+            <g id="lanternRays" stroke="#6C8CFF" stroke-width="0.7"></g>
+            <path id="spotCone" d="M200 200 L150 20 A190 190 0 0 1 250 20 Z" fill="url(#spotG)" opacity="0"/>
+            <circle cx="200" cy="200" r="4" fill="#EDEDEA"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VI. THE SOVEREIGNTY ================= -->
+<section class="dimension reverse" id="sovereignty">
+  <div class="wrap">
+    <div class="dim-grid">
+      <div class="dim-copy reveal">
+        <span class="roman">DIMENSION VI</span>
+        <h2>The Sovereignty</h2>
+        <p class="subtitle">Attention &amp; modernity</p>
+        <p>
+          The aperture can be captured. Smartphones, task-lists and infinite feeds
+          <strong>overtrain the spotlight</strong>, narrowing the human experience until the mind grows
+          <strong>"irritable, distracted, and diminished."</strong> Every bored moment filled with a
+          screen is a moment stolen from mind-wandering.
+        </p>
+        <p>
+          This is now an economy. Corporations compete not merely for attention but for
+          <strong>"dream time"</strong> and emotional attachment. The result is a threat to
+          <strong>consciousness sovereignty</strong> — the capacity to think independently, unpolluted by
+          an external agenda.
+        </p>
+        <div class="evidence">
+          <div class="row"><div class="k">The Narrowing</div><div class="v">Overtrained spotlight attention leaves the mind <b>distracted and diminished</b>, unable to widen back out.</div></div>
+          <div class="row"><div class="k">Lost Drift</div><div class="v">Filling every idle gap with distraction erases the <b>space where original thought forms</b>.</div></div>
+          <div class="row"><div class="k">Attention Economy</div><div class="v">The market now bids on your <b>dream-time</b>. Manipulation rises; independent thought gets harder.</div></div>
+        </div>
+        <div class="signal">
+          The final resource being mined is not your data. It is your interiority — the quiet room where a self can still hear itself think.
+          <span class="src">— On consciousness sovereignty</span>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div class="visual">
+          <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+          <div class="coord">FIG. 06<br>ATTENTION FUNNEL<br>broad→captured</div>
+          <div class="fig-label">Fig. 06 — The narrowing of attention</div>
+          <svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="funnelG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#6C8CFF" stop-opacity="0.85"/>
+                <stop offset="1" stop-color="#D6A15E" stop-opacity="0.9"/>
+              </linearGradient>
+            </defs>
+            <g id="funnel" stroke="url(#funnelG)" fill="none"></g>
+            <g id="funnelDots" fill="#6C8CFF"></g>
+            <circle cx="200" cy="360" r="3.5" fill="#D6A15E"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HORIZON — PARADIGMS ================= -->
+<section class="band paradigms" id="horizon">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="reveal">
+        <span class="eyebrow">The Horizon</span>
+        <h2 style="margin-top:20px;">When materialism hits the wall</h2>
+      </div>
+      <span class="idx reveal">M · I · P · A</span>
+    </div>
+    <p class="lead reveal d1">
+      As the belief that matter simply <em>produces</em> mind runs out of explanatory power, serious
+      researchers — including neuroscientist <strong>Christof Koch</strong> — are re-opening theories once
+      considered fringe. None is proven. The framework holds them as live options on the horizon.
+    </p>
+
+    <div class="cards">
+      <div class="p-card reveal">
+        <div class="p-vis">
+          <svg viewBox="0 0 200 200">
+            <g id="pm1"></g>
+            <rect x="60" y="60" width="80" height="80" fill="none" stroke="#6C8CFF" stroke-width="1"/>
+            <circle cx="100" cy="100" r="6" fill="#EDEDEA"/>
+          </svg>
+        </div>
+        <span class="p-num">THEORY 01</span>
+        <h3>Materialism</h3>
+        <p>Consciousness is an <strong>emergent property</strong> of the brain. Matter is primary; mind is what complex matter does.</p>
+      </div>
+
+      <div class="p-card reveal d1">
+        <div class="p-vis">
+          <svg viewBox="0 0 200 200">
+            <defs><radialGradient id="idealG" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#6C8CFF" stop-opacity="0.6"/><stop offset="1" stop-color="#6C8CFF" stop-opacity="0"/></radialGradient></defs>
+            <circle cx="100" cy="100" r="90" fill="url(#idealG)"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#6C8CFF" stroke-width="0.5" opacity="0.5"/>
+            <rect x="88" y="88" width="24" height="24" fill="none" stroke="#EDEDEA" stroke-width="1"/>
+          </svg>
+        </div>
+        <span class="p-num">THEORY 02</span>
+        <h3>Idealism</h3>
+        <p>Consciousness is a <strong>universal field</strong> that precedes matter. The physical world is secondary — an appearance within mind.</p>
+      </div>
+
+      <div class="p-card reveal d2">
+        <div class="p-vis">
+          <svg viewBox="0 0 200 200"><g id="panps"></g></svg>
+        </div>
+        <span class="p-num">THEORY 03</span>
+        <h3>Panpsychism</h3>
+        <p>Every particle of matter carries a <strong>quantum of consciousness</strong>. Mind is a fundamental property, like mass or charge.</p>
+      </div>
+
+      <div class="p-card reveal d3">
+        <div class="p-vis">
+          <svg viewBox="0 0 200 200">
+            <g id="antenna" stroke="#6C8CFF" fill="none"></g>
+            <line x1="100" y1="120" x2="100" y2="180" stroke="#EDEDEA" stroke-width="1.5"/>
+            <circle cx="100" cy="120" r="4" fill="#D6A15E"/>
+          </svg>
+        </div>
+        <span class="p-num">THEORY 04</span>
+        <h3>Antenna</h3>
+        <p>The brain does not generate consciousness — it <strong>receives</strong> it, like a radio tuning a signal it did not create.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONCLUSION — DON'T KNOW MIND ================= -->
+<section class="conclusion" id="conclusion">
+  <canvas id="dontknow-canvas"></canvas>
+  <div class="wrap">
+    <div class="reveal"><span class="eyebrow" style="justify-content:center;">The Conclusion</span></div>
+    <h2 class="reveal d1">The study of mind returns you, again and again, to the "don't-know mind."</h2>
+    <p class="lead reveal d2">
+      There is no closing solution — only, as Zen teacher <strong>Joan Halifax</strong> puts it, "wonder in
+      the face of mystery." Meditation and psychedelics reveal the <strong>self</strong> to be less a fixed
+      object than a <strong>"controlled hallucination,"</strong> a social construct reinforced through
+      interaction. What remains is a practice: protecting the space of interiority so a sovereign,
+      present mind can exist at all.
+    </p>
+
+    <div class="hygiene">
+      <div class="h-cell reveal">
+        <span class="k">Practice 01</span>
+        <h4>Reclaim the Drift</h4>
+        <p>Leave bored moments unfilled. Mind-wandering is not idleness — it is the hygienic space where original thought is born.</p>
+      </div>
+      <div class="h-cell reveal d1">
+        <span class="k">Practice 02</span>
+        <h4>Guard Interiority</h4>
+        <p>Treat attention as sovereign territory. Refuse to let external agendas pollute the quiet room where a self hears itself.</p>
+      </div>
+      <div class="h-cell reveal d2">
+        <span class="k">Practice 03</span>
+        <h4>Hold the Mystery</h4>
+        <p>Trade the demand for a final answer for the power of the don't-know mind — presence, wonder, and a wider aperture.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= READING ================= -->
+<section class="band reading" id="reading">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="reveal"><span class="eyebrow">The Field</span><h2 style="margin-top:20px;">Further into the mystery</h2></div>
+      <span class="idx reveal">03 SOURCES</span>
+    </div>
+    <div class="list">
+      <div class="item reveal">
+        <span class="n">01</span>
+        <div class="t">The Blind Spot<span>Evan Thompson · Adam Frank · Marcelo Gleiser</span></div>
+        <div class="d">A critique of science's inability to account for lived experience — the observer it keeps leaving out.</div>
+      </div>
+      <div class="item reveal d1">
+        <span class="n">02</span>
+        <div class="t">Ducks, Newburyport<span>Lucy Ellmann</span></div>
+        <div class="d">A 1,000-page, one-sentence stream-of-consciousness novel — the modern mind rendered without a full stop.</div>
+      </div>
+      <div class="item reveal d2">
+        <span class="n">03</span>
+        <div class="t">Being You<span>Anil Seth</span></div>
+        <div class="d">A neuroscientific account of the self as a "controlled hallucination" the brain builds to keep a body alive.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      A World Appears
+      <span>A framework distilled from the science and philosophy of consciousness explored in Michael Pollan's <em>A Journey Into Consciousness</em>.</span>
+    </div>
+    <div class="foot-meta">
+      6 Dimensions · 1 Horizon<br>
+      Stream · Substrate · Spectrum<br>
+      Purpose · Aperture · Sovereignty<br>
+      The Don't-Know Mind
+    </div>
+  </div>
+  <div class="foot-rule">
+    <span>Consciousness Framework · Interactive Briefing</span>
+    <span>Design System — Technical / Palantir-Inspired</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Nav solidify + scroll progress + active section ---------- */
+  var nav = document.getElementById("nav");
+  var progress = document.getElementById("progress");
+  var links = Array.prototype.slice.call(document.querySelectorAll("#navIndex a"));
+  var sections = ["framework","stream","substrate","spectrum","purpose","aperture","sovereignty","horizon"]
+    .map(function(id){ return document.getElementById(id); }).filter(Boolean);
+
+  function onScroll(){
+    var y = window.scrollY || window.pageYOffset;
+    nav.classList.toggle("solid", y > 40);
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.width = (h>0 ? (y/h*100) : 0) + "%";
+    // active section
+    var mid = y + window.innerHeight*0.35;
+    var current = null;
+    for (var i=0;i<sections.length;i++){
+      if (sections[i].offsetTop <= mid) current = sections[i].id;
+    }
+    links.forEach(function(a){ a.classList.toggle("active", a.getAttribute("data-t")===current); });
+  }
+  window.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+
+  /* ---------- Reveal on scroll ---------- */
+  if ("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, {threshold:0.12, rootMargin:"0px 0px -8% 0px"});
+    document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+  }
+
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(name, attrs){ var e=document.createElementNS(SVGNS,name); for(var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+  /* ============================================================
+     FIG 01 — THE STREAM : flowing interference lines
+     ============================================================ */
+  (function(){
+    var g = document.getElementById("streamLines");
+    var nodes = document.getElementById("streamNodes");
+    if(!g) return;
+    var W=400, H=400, LINES=13;
+    for(var i=0;i<LINES;i++){
+      var yBase = 30 + i*(H-60)/(LINES-1);
+      var amp = 10 + Math.random()*26;
+      var phase = Math.random()*Math.PI*2;
+      var freq = 1 + Math.random()*2;
+      var d = "M -20 " + yBase;
+      for(var x=-20;x<=W+20;x+=8){
+        var y = yBase + Math.sin((x/W)*Math.PI*2*freq + phase)*amp*(0.5+0.5*Math.sin(x/120));
+        d += " L "+x.toFixed(1)+" "+y.toFixed(1);
+      }
+      var p = el("path",{d:d, "stroke-width":(0.5+Math.random()*1.1).toFixed(2), opacity:(0.25+Math.random()*0.6).toFixed(2)});
+      g.appendChild(p);
+      if(!reduce){
+        var len = 900;
+        p.setAttribute("stroke-dasharray", len);
+        p.setAttribute("stroke-dashoffset", len);
+        p.style.animation = "streamdash "+(6+Math.random()*6)+"s ease-out "+(i*0.12)+"s forwards, streamdrift "+(8+i)+"s ease-in-out "+(i*0.2)+"s infinite alternate";
+      }
+    }
+    // fringe nodes
+    for(var n=0;n<9;n++){
+      var cx=40+Math.random()*320, cy=40+Math.random()*320;
+      var c = el("circle",{cx:cx,cy:cy,r:(1.2+Math.random()*2).toFixed(1),opacity:0.8});
+      nodes.appendChild(c);
+      var halo = el("circle",{cx:cx,cy:cy,r:5,fill:"none",stroke:"#6C8CFF","stroke-width":0.5,opacity:0.4});
+      nodes.appendChild(halo);
+      if(!reduce) halo.style.animation="haloPulse "+(2+Math.random()*2)+"s ease-in-out "+Math.random()*2+"s infinite";
+    }
+  })();
+
+  /* ============================================================
+     FIG 02 — THE SUBSTRATE : soma pulse -> cortex node graph
+     ============================================================ */
+  (function(){
+    var rings=document.getElementById("somaRings");
+    var nodesG=document.getElementById("somaNodes");
+    var linksG=document.getElementById("somaLinks");
+    if(!rings) return;
+    var cx=200, cy=248;
+    for(var i=0;i<5;i++){
+      var r=el("circle",{cx:cx,cy:cy,r:18+i*30,"stroke-width":0.7,opacity:(0.5-i*0.08).toFixed(2)});
+      rings.appendChild(r);
+      if(!reduce) r.style.animation="ringExpand 4s ease-out "+(i*0.8)+"s infinite";
+    }
+    // cortex nodes in upper region
+    var pts=[];
+    for(var n=0;n<18;n++){
+      var a=Math.random()*Math.PI - Math.PI; // upper spread
+      var px=cx + (Math.random()-0.5)*260;
+      var py=60 + Math.random()*130;
+      pts.push([px,py]);
+      var dot=el("circle",{cx:px,cy:py,r:(1.3+Math.random()*1.8).toFixed(1),fill:"#EDEDEA",opacity:0.85});
+      nodesG.appendChild(dot);
+      if(!reduce) dot.style.animation="haloPulse "+(2+Math.random()*3)+"s ease-in-out "+Math.random()*3+"s infinite";
+    }
+    // links between nearby cortex nodes
+    for(var i=0;i<pts.length;i++){
+      for(var j=i+1;j<pts.length;j++){
+        var dx=pts[i][0]-pts[j][0], dy=pts[i][1]-pts[j][1];
+        if(Math.sqrt(dx*dx+dy*dy)<70){
+          linksG.appendChild(el("line",{x1:pts[i][0],y1:pts[i][1],x2:pts[j][0],y2:pts[j][1],opacity:0.35}));
+        }
+      }
+      // ascending link from soma
+      linksG.appendChild(el("line",{x1:cx,y1:cy,x2:pts[i][0],y2:pts[i][1],opacity:0.08}));
+    }
+  })();
+
+  /* ============================================================
+     FIG 03 — THE SPECTRUM : branching growth (bacteria->mind)
+     ============================================================ */
+  (function(){
+    var g=document.getElementById("growth");
+    var dots=document.getElementById("growthDots");
+    if(!g) return;
+    function branch(x,y,angle,len,depth,width){
+      if(depth<=0||len<6) return;
+      var x2=x+Math.cos(angle)*len, y2=y+Math.sin(angle)*len;
+      var p=el("path",{d:"M "+x.toFixed(1)+" "+y.toFixed(1)+" Q "+((x+x2)/2+(Math.random()-0.5)*10).toFixed(1)+" "+((y+y2)/2).toFixed(1)+" "+x2.toFixed(1)+" "+y2.toFixed(1),"stroke-width":width.toFixed(2),opacity:(0.4+depth*0.09).toFixed(2)});
+      g.appendChild(p);
+      if(!reduce){ var L=len*1.6; p.setAttribute("stroke-dasharray",L); p.setAttribute("stroke-dashoffset",L); p.style.animation="streamdash 1.4s ease-out "+((7-depth)*0.28)+"s forwards"; }
+      if(depth<=2){ var d=el("circle",{cx:x2,cy:y2,r:(1.5+Math.random()*1.5).toFixed(1),opacity:0.9}); dots.appendChild(d);
+        if(!reduce){ d.style.opacity=0; d.style.animation="fadeIn 0.6s ease "+((7-depth)*0.28+1)+"s forwards"; } }
+      var n = depth>4?2:(Math.random()<0.7?2:1);
+      for(var i=0;i<n;i++){
+        branch(x2,y2,angle-0.5+Math.random()*1.0 - (n>1?(i===0?0.4:-0.4):0), len*(0.72+Math.random()*0.12), depth-1, width*0.78);
+      }
+    }
+    branch(200,388,-Math.PI/2,74,7,3.2);
+  })();
+
+  /* ============================================================
+     FIG 04 — THE PURPOSE : decision bifurcation tree
+     ============================================================ */
+  (function(){
+    var g=document.getElementById("tree");
+    var nodesG=document.getElementById("treeNodes");
+    if(!g) return;
+    var levels=5, startX=200, startY=40, dy=72;
+    var nodes=[[startX,startY]];
+    var current=[[startX,startY]];
+    for(var lvl=0;lvl<levels;lvl++){
+      var next=[];
+      var spread=120/(lvl+1);
+      current.forEach(function(pt){
+        var y2=pt[1]+dy;
+        var branchN = lvl<3?2:1;
+        for(var b=0;b<branchN;b++){
+          var x2 = branchN===2 ? pt[0]+(b===0?-spread:spread) : pt[0]+(Math.random()-0.5)*40;
+          x2=Math.max(30,Math.min(370,x2));
+          var mx=(pt[0]+x2)/2;
+          g.appendChild(el("path",{d:"M "+pt[0]+" "+pt[1]+" C "+pt[0]+" "+(pt[1]+dy*0.5)+" "+x2+" "+(y2-dy*0.5)+" "+x2+" "+y2,"stroke-width":(1.4-lvl*0.18).toFixed(2),opacity:(0.7-lvl*0.09).toFixed(2)}));
+          next.push([x2,y2]);
+        }
+      });
+      current=next;
+      nodes=nodes.concat(next);
+    }
+    nodes.forEach(function(pt,i){
+      var chosen = (i===0);
+      var c=el("circle",{cx:pt[0],cy:pt[1],r:chosen?5:(2.4),fill:chosen?"#D6A15E":"#EDEDEA",opacity:0.9});
+      nodesG.appendChild(c);
+      if(!reduce){ c.style.opacity=0; c.style.animation="fadeIn 0.5s ease "+(pt[1]/400*1.4)+"s forwards"; }
+    });
+    // highlight one resolved path
+    if(!reduce){
+      var glow=el("circle",{cx:200,cy:40,r:9,fill:"none",stroke:"#D6A15E","stroke-width":1,opacity:0.6});
+      nodesG.appendChild(glow); glow.style.animation="haloPulse 2.4s ease-in-out infinite";
+    }
+  })();
+
+  /* ============================================================
+     FIG 05 — THE APERTURE : lantern rays + toggling spotlight
+     ============================================================ */
+  (function(){
+    var rays=document.getElementById("lanternRays");
+    var cone=document.getElementById("spotCone");
+    var field=document.getElementById("lanternField");
+    if(!rays) return;
+    for(var i=0;i<48;i++){
+      var a=(i/48)*Math.PI*2;
+      var r1=14, r2=150+Math.random()*30;
+      rays.appendChild(el("line",{x1:200+Math.cos(a)*r1,y1:200+Math.sin(a)*r1,x2:200+Math.cos(a)*r2,y2:200+Math.sin(a)*r2,opacity:(0.12+Math.random()*0.22).toFixed(2)}));
+    }
+    if(!reduce){
+      // toggle between lantern (wide) and spotlight (cone)
+      var state=0;
+      setInterval(function(){
+        state=1-state;
+        if(state){ cone.style.transition="opacity 1.2s"; cone.style.opacity="1"; field.style.transition="opacity 1.2s"; field.style.opacity="0.15"; rays.style.transition="opacity 1.2s"; rays.style.opacity="0.15"; }
+        else { cone.style.opacity="0"; field.style.opacity="1"; rays.style.opacity="1"; }
+      }, 3200);
+    }
+  })();
+
+  /* ============================================================
+     FIG 06 — THE SOVEREIGNTY : narrowing funnel of particles
+     ============================================================ */
+  (function(){
+    var g=document.getElementById("funnel");
+    var dotsG=document.getElementById("funnelDots");
+    if(!g) return;
+    // funnel walls
+    var levels=9;
+    for(var i=0;i<levels;i++){
+      var t=i/(levels-1);
+      var y=40+t*300;
+      var halfW=(1-t)*170+6;
+      g.appendChild(el("line",{x1:200-halfW,y1:y,x2:200+halfW,y2:y,"stroke-width":0.6,opacity:(0.5-t*0.35).toFixed(2)}));
+    }
+    g.appendChild(el("path",{d:"M30 40 L200 360","stroke-width":1,opacity:0.5}));
+    g.appendChild(el("path",{d:"M370 40 L200 360","stroke-width":1,opacity:0.5}));
+    // descending captured particles
+    for(var n=0;n<26;n++){
+      var startX=40+Math.random()*320;
+      var d=el("circle",{cx:startX,cy:40,r:(1.2+Math.random()*1.8).toFixed(1),opacity:0.85});
+      dotsG.appendChild(d);
+      if(!reduce){
+        var dur=(3+Math.random()*3).toFixed(2), delay=(Math.random()*4).toFixed(2);
+        d.style.setProperty("--sx", startX+"px");
+        d.animate(
+          [
+            {transform:"translate("+(startX-200)+"px,0)", opacity:0},
+            {opacity:0.9, offset:0.1},
+            {transform:"translate(0,320px)", opacity:0.2}
+          ],
+          {duration:dur*1000, delay:delay*1000, iterations:Infinity, easing:"cubic-bezier(.5,0,.9,.6)"}
+        );
+      }
+    }
+  })();
+
+  /* ============================================================
+     PARADIGM MINI-DIAGRAMS
+     ============================================================ */
+  (function(){
+    // materialism: emergent lattice
+    var pm1=document.getElementById("pm1");
+    if(pm1){ for(var i=0;i<5;i++)for(var j=0;j<5;j++){ pm1.appendChild(el("circle",{cx:40+i*30,cy:40+j*30,r:1.4,fill:"#3F5AC0",opacity:0.5})); } }
+    // panpsychism: dust of psyche
+    var pan=document.getElementById("panps");
+    if(pan){ for(var k=0;k<70;k++){ var x=20+Math.random()*160,y=20+Math.random()*160; pan.appendChild(el("circle",{cx:x,cy:y,r:(0.8+Math.random()*1.8).toFixed(1),fill:"#6C8CFF",opacity:(0.3+Math.random()*0.6).toFixed(2)})); } }
+    // antenna: receiving arcs
+    var ant=document.getElementById("antenna");
+    if(ant){ for(var a=1;a<=4;a++){ ant.appendChild(el("path",{d:"M "+(100-a*16)+" 120 A "+(a*16)+" "+(a*16)+" 0 0 1 "+(100+a*16)+" 120","stroke-width":0.8,opacity:(0.6-a*0.1).toFixed(2)})); } }
+  })();
+
+  /* ============================================================
+     HERO CANVAS — "a world appears": particle sphere emerging
+     ============================================================ */
+  (function(){
+    var canvas=document.getElementById("hero-canvas");
+    if(!canvas) return;
+    var ctx=canvas.getContext("2d");
+    var DPR=Math.min(window.devicePixelRatio||1, 2);
+    var w,h,cx,cy,R;
+    var pts=[];
+    var N = reduce?260:520;
+
+    function resize(){
+      w=canvas.clientWidth; h=canvas.clientHeight;
+      canvas.width=w*DPR; canvas.height=h*DPR;
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      cx=w*0.5; cy=h*0.48; R=Math.min(w,h)*0.34;
+    }
+    function build(){
+      pts=[];
+      for(var i=0;i<N;i++){
+        // fibonacci sphere
+        var yy=1-(i/(N-1))*2;
+        var rad=Math.sqrt(1-yy*yy);
+        var theta=Math.PI*(3-Math.sqrt(5))*i;
+        pts.push({x:Math.cos(theta)*rad, y:yy, z:Math.sin(theta)*rad, tw:Math.random()*Math.PI*2});
+      }
+    }
+    resize(); build();
+    window.addEventListener("resize", function(){ resize(); });
+
+    var rot=0, raf;
+    function frame(){
+      ctx.clearRect(0,0,w,h);
+      rot += reduce?0.0:0.0016;
+      var cosR=Math.cos(rot), sinR=Math.sin(rot);
+      var tilt=0.42, cosT=Math.cos(tilt), sinT=Math.sin(tilt);
+      var projected=[];
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i];
+        // rotate around Y
+        var x=p.x*cosR - p.z*sinR;
+        var z=p.x*sinR + p.z*cosR;
+        var y=p.y;
+        // tilt around X
+        var y2=y*cosT - z*sinT;
+        var z2=y*sinT + z*cosT;
+        projected.push({sx:cx+x*R, sy:cy+y2*R, z:z2, tw:p.tw});
+      }
+      projected.sort(function(a,b){ return a.z-b.z; });
+      // connecting arcs near front
+      ctx.lineWidth=0.5;
+      for(var i=0;i<projected.length;i++){
+        var a=projected[i];
+        var depth=(a.z+1)/2;
+        var alpha=0.15+depth*0.75;
+        var tw=reduce?1:(0.6+0.4*Math.sin(Date.now()*0.001+a.tw));
+        var size=(0.5+depth*1.6);
+        // link to a couple near neighbors in the front hemisphere
+        if(depth>0.55 && i%2===0){
+          for(var j=i+1;j<Math.min(i+3,projected.length);j++){
+            var b=projected[j];
+            var dx=a.sx-b.sx, dy=a.sy-b.sy;
+            if(dx*dx+dy*dy<2600){
+              ctx.strokeStyle="rgba(108,140,255,"+(0.06*depth).toFixed(3)+")";
+              ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy); ctx.stroke();
+            }
+          }
+        }
+        ctx.beginPath();
+        ctx.arc(a.sx,a.sy,size,0,Math.PI*2);
+        var col = depth>0.7 ? "236,236,234" : "108,140,255";
+        ctx.fillStyle="rgba("+col+","+(alpha*tw).toFixed(3)+")";
+        ctx.fill();
+      }
+      // faint horizon ring
+      ctx.strokeStyle="rgba(108,140,255,0.10)";
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.ellipse(cx,cy,R*1.02,R*1.02*Math.abs(Math.sin(tilt))+R*0.02,0,0,Math.PI*2); ctx.stroke();
+      raf=requestAnimationFrame(frame);
+    }
+    frame();
+    // pause when offscreen
+    if("IntersectionObserver" in window){
+      new IntersectionObserver(function(en){
+        en.forEach(function(e){ if(e.isIntersecting){ if(!raf) frame(); } else { cancelAnimationFrame(raf); raf=null; } });
+      },{threshold:0.01}).observe(canvas);
+    }
+  })();
+
+  /* ============================================================
+     CONCLUSION CANVAS — dissolving self (particle drift)
+     ============================================================ */
+  (function(){
+    var canvas=document.getElementById("dontknow-canvas");
+    if(!canvas) return;
+    var ctx=canvas.getContext("2d");
+    var DPR=Math.min(window.devicePixelRatio||1,2);
+    var w,h,parts=[];
+    var N=reduce?60:150;
+    function resize(){ w=canvas.clientWidth; h=canvas.clientHeight; canvas.width=w*DPR; canvas.height=h*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+    function build(){ parts=[]; for(var i=0;i<N;i++){ parts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.25,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1}); } }
+    resize(); build();
+    window.addEventListener("resize", function(){ resize(); build(); });
+    var raf;
+    function frame(){
+      ctx.clearRect(0,0,w,h);
+      for(var i=0;i<parts.length;i++){
+        var p=parts[i];
+        if(!reduce){ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=w; if(p.x>w)p.x=0; if(p.y<0)p.y=h; if(p.y>h)p.y=0; }
+        for(var j=i+1;j<parts.length;j++){
+          var q=parts[j]; var dx=p.x-q.x, dy=p.y-q.y; var d2=dx*dx+dy*dy;
+          if(d2<9000){ ctx.strokeStyle="rgba(108,140,255,"+(0.05*(1-d2/9000)).toFixed(3)+")"; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke(); }
+        }
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle="rgba(236,236,234,"+p.a.toFixed(2)+")"; ctx.fill();
+      }
+      raf=requestAnimationFrame(frame);
+    }
+    if("IntersectionObserver" in window){
+      new IntersectionObserver(function(en){ en.forEach(function(e){ if(e.isIntersecting){ if(!raf) frame(); } else { cancelAnimationFrame(raf); raf=null; } }); },{threshold:0.01}).observe(canvas);
+    } else { frame(); }
+  })();
+
+})();
+</script>
+
+<style>
+  @keyframes streamdash { to { stroke-dashoffset:0; } }
+  @keyframes streamdrift { from { transform:translateY(-3px);} to { transform:translateY(3px);} }
+  @keyframes haloPulse { 0%,100%{ transform:scale(1); opacity:0.4;} 50%{ transform:scale(1.5); opacity:0.9;} }
+  @keyframes ringExpand { 0%{ transform:scale(0.4); opacity:0.7;} 100%{ transform:scale(1.8); opacity:0;} }
+  @keyframes fadeIn { to { opacity:0.9; } }
+  #somaRings circle, #streamNodes circle, #treeNodes circle { transform-box:fill-box; transform-origin:center; }
+</style>
+
